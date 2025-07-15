@@ -9,15 +9,36 @@
         :key="estudiante.url"
         class="estudiante-item"
       >
-        <router-link
-          :to="{
-            name: 'EstudianteDetail',
-            params: { estudianteUrl: estudiante.url },
-          }"
-        >
-          {{ estudiante.nombre }} {{ estudiante.apellido }} (Cédula:
-          {{ estudiante.cedula }})
-        </router-link>
+        <div class="estudiante-info">
+          <router-link
+            :to="{
+              name: 'EstudianteDetail',
+              params: { estudianteUrl: estudiante.url },
+            }"
+          >
+            {{ estudiante.nombre }} {{ estudiante.apellido }} (Cédula:
+            {{ estudiante.cedula }})
+          </router-link>
+
+          <div class="acciones">
+            <router-link
+              :to="{
+                name: 'EstudianteEditar',
+                params: { estudianteUrl: estudiante.url },
+              }"
+              class="editar-btn"
+            >
+              Editar
+            </router-link>
+
+            <button
+              @click="eliminarEstudiante(estudiante.url)"
+              class="eliminar-btn"
+            >
+              Eliminar
+            </button>
+          </div>
+        </div>
       </li>
     </ul>
     <p v-else>No hay estudiantes registrados.</p>
@@ -49,21 +70,59 @@ export default {
         this.error = null;
         const response = await api.get("estudiantes/");
         this.estudiantes = response.data.results || response.data;
-        console.log("Estudiantes cargados:", this.estudiantes);
       } catch (err) {
-        console.error("Error al cargar estudiantes:", err.response || err);
-        this.error =
-          "No se pudieron cargar los estudiantes. Asegúrate de estar logueado.";
+        this.error = "No se pudieron cargar los estudiantes.";
       } finally {
         this.loading = false;
       }
     },
-    // Ya no necesitamos getEstudianteId() si pasamos la URL completa
+    async eliminarEstudiante(url) {
+      if (!confirm("¿Estás seguro de que deseas eliminar este estudiante?")) {
+        return;
+      }
+      try {
+        await api.delete(url);
+        this.estudiantes = this.estudiantes.filter((e) => e.url !== url);
+      } catch (err) {
+        console.error("Error al eliminar estudiante:", err.response || err);
+        alert("No se pudo eliminar el estudiante.");
+      }
+    },
   },
 };
 </script>
 
 <style scoped>
+.estudiante-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.editar-btn,
+.eliminar-btn {
+  padding: 5px 10px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+}
+
+.editar-btn {
+  background-color: #ffc107;
+}
+
+.eliminar-btn {
+  background-color: #dc3545;
+}
+
 .estudiantes-list-container {
   max-width: 800px;
   margin: 50px auto;

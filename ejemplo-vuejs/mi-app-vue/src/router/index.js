@@ -35,6 +35,13 @@ const routes = [
     component: EstudianteNuevo,
     meta: { requiresAuth: true }, // Marca esta ruta como protegida
   },
+  {
+    path: "/estudiantes/editar/:estudianteUrl*", // usa * para capturar toda la URL
+    name: "EstudianteEditar",
+    component: () => import("@/views/EstudiantesEditar.vue"),
+    meta: { requiresAuth: true },
+    props: true,
+  },
 ];
 
 const router = createRouter({
