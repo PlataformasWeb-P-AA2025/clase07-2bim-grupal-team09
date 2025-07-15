@@ -3,6 +3,7 @@ import HomeView from "../views/HomeView.vue";
 import Login from "../views/Login.vue"; // Tu nuevo componente de login
 import EstudiantesList from "../views/EstudiantesList.vue"; // Tu nuevo componente de lista de estudiantes
 import EstudianteDetail from "../views/EstudianteDetail.vue"; // ¡Importa el nuevo componente!
+import EstudianteNuevo from "../views/EstudiantesNuevo.vue"; // Componente para crear un nuevo estudiante
 
 const routes = [
   {
@@ -27,6 +28,12 @@ const routes = [
     component: EstudianteDetail,
     props: true, // Esto pasa el ':id' como una prop al componente EstudianteDetail
     meta: { requiresAuth: true },
+  },
+  {
+    path: "/estudiantes/nuevo",
+    name: "EstudianteNuevo",
+    component: EstudianteNuevo,
+    meta: { requiresAuth: true }, // Marca esta ruta como protegida
   },
 ];
 
