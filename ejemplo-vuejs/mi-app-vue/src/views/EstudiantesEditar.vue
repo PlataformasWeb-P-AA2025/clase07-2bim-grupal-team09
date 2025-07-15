@@ -20,6 +20,9 @@
     <p v-if="mensajeExito" class="mensaje-exito">{{ mensajeExito }}</p>
     <p v-if="error" class="mensaje-error">{{ error }}</p>
   </div>
+  <router-link :to="{ name: 'EstudiantesList' }" class="back-button">
+    Volver al Listado
+  </router-link>
 </template>
 
 <script>

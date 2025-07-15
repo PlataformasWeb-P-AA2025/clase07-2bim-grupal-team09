@@ -42,6 +42,21 @@ const routes = [
     meta: { requiresAuth: true },
     props: true,
   },
+  {
+    path: "/telefonos/editar/:telefonoUrl",
+    name: "EditarTelefono",
+    component: () => import("@/views/EditarTelefono.vue"),
+    props: (route) => ({
+      telefonoUrl: decodeURIComponent(route.params.telefonoUrl),
+    }),
+  },
+  {
+    path: "/telefonos/agregar/:estudianteUrl*",
+    name: "AgregarTelefono",
+    component: () => import("@/views/TelefonoAgregar.vue"),
+    props: true,
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

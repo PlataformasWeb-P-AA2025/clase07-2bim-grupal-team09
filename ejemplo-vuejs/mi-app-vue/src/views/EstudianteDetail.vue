@@ -3,6 +3,7 @@
     <h2>Detalle del Estudiante</h2>
     <p v-if="loading">Cargando detalles...</p>
     <p v-if="error" class="error-message">{{ error }}</p>
+
     <div v-else-if="estudiante">
       <h3>{{ estudiante.nombre }} {{ estudiante.apellido }}</h3>
       <p><strong>Cédula:</strong> {{ estudiante.cedula }}</p>
@@ -12,14 +13,40 @@
       <ul v-if="numerosTelefonicos.length">
         <li v-for="numero in numerosTelefonicos" :key="numero.url">
           {{ numero.telefono }} ({{ numero.tipo }})
+
+          <router-link
+            :to="{
+              name: 'EditarTelefono',
+              params: { telefonoUrl: encodeURIComponent(numero.url) },
+            }"
+            class="edit-button"
+          >
+            Editar
+          </router-link>
+
+          <button @click="eliminarTelefono(numero.url)" class="delete-button">
+            Eliminar
+          </button>
         </li>
       </ul>
       <p v-else>No tiene números telefónicos registrados.</p>
 
-      <router-link :to="{ name: 'EstudiantesList' }" class="back-button"
-        >Volver al Listado</router-link
+      <!-- Botón para agregar nuevo número -->
+      <router-link
+        :to="{
+          name: 'AgregarTelefono',
+          params: { estudianteUrl: encodeURIComponent(estudiante.url) },
+        }"
+        class="add-phone-button"
       >
+        Agregar Número Telefónico
+      </router-link>
+
+      <router-link :to="{ name: 'EstudiantesList' }" class="back-button">
+        Volver al Listado
+      </router-link>
     </div>
+
     <p v-else>Estudiante no encontrado.</p>
   </div>
 </template>
@@ -29,7 +56,7 @@ import api from "@/api/axios";
 
 export default {
   name: "EstudianteDetail",
-  props: ["estudianteUrl"], // <-- Ahora recibe 'estudianteUrl' como prop
+  props: ["estudianteUrl"],
   data() {
     return {
       estudiante: null,
@@ -39,42 +66,45 @@ export default {
     };
   },
   async created() {
-    // La URL viene codificada por el router, necesitamos decodificarla
     const decodedUrl = decodeURIComponent(this.estudianteUrl);
     await this.fetchEstudianteDetail(decodedUrl);
-    await this.fetchNumerosTelefonicos(decodedUrl); // También pasamos la URL para filtrar
+    await this.fetchNumerosTelefonicos(decodedUrl);
   },
   methods: {
     async fetchEstudianteDetail(url) {
       try {
         this.loading = true;
         this.error = null;
-        // Usamos la URL completa directamente para la petición
         const response = await api.get(url);
         this.estudiante = response.data;
       } catch (err) {
-        console.error(
-          "Error al cargar detalle del estudiante:",
-          err.response || err
-        );
+        console.error("Error al cargar detalle del estudiante:", err);
         this.error = "No se pudo cargar el detalle del estudiante.";
       } finally {
         this.loading = false;
       }
     },
     async fetchNumerosTelefonicos(estudianteApiUrl) {
-      console.log(estudianteApiUrl);
       try {
         const response = await api.get("numerosts/");
-        // Filtramos los números telefónicos que pertenecen a este estudiante usando la URL completa
         this.numerosTelefonicos = response.data.results.filter(
           (numero) => numero.estudiante === estudianteApiUrl
         );
       } catch (err) {
-        console.error(
-          "Error al cargar números telefónicos:",
-          err.response || err
-        );
+        console.error("Error al cargar números telefónicos:", err);
+      }
+    },
+    async eliminarTelefono(url) {
+      if (confirm("¿Eliminar este número telefónico?")) {
+        try {
+          await api.delete(url);
+          this.numerosTelefonicos = this.numerosTelefonicos.filter(
+            (n) => n.url !== url
+          );
+        } catch (error) {
+          console.error("Error al eliminar teléfono:", error);
+          alert("No se pudo eliminar el número.");
+        }
       }
     },
   },
@@ -115,10 +145,17 @@ li {
   margin-bottom: 5px;
 }
 
-.back-button {
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.back-button,
+.add-phone-button {
   display: block;
   width: fit-content;
-  margin: 20px auto 0;
+  margin: 10px auto;
   padding: 10px 20px;
   background-color: #007bff;
   color: white;
@@ -132,9 +169,39 @@ li {
   background-color: #0056b3;
 }
 
-.error-message {
-  color: red;
-  text-align: center;
-  margin-top: 10px;
+.add-phone-button {
+  background-color: #28a745;
+}
+
+.add-phone-button:hover {
+  background-color: #218838;
+}
+
+.edit-button,
+.delete-button {
+  margin-left: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: none;
+  color: white;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.edit-button {
+  background-color: #007bff;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-button {
+  background-color: #dc3545;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
 }
 </style>
